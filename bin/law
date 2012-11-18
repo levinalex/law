@@ -17,13 +17,11 @@ module CLI
       raise "#{directory} must be a directory" unless File.directory?(directory)
 
       Dir[File.join(directory, "**/*.xml")].each do |fname|
-        p fname
-
-        xml = Nokogiri::XML(fname)
-
+        xml = Nokogiri::XML(File.open(fname))
+        law = Law::Law.from_xml(xml)
 
 
-        # Law::Parser.new(global_options[:data])
+        p law
       end
 
 
