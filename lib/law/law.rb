@@ -35,14 +35,26 @@ module Law
     end
 
     def inspect
-      "#{@bez} #{@sn}"
+      "S: #{@bez} #{@sn}"
     end
   end
 
   class Para
+    def depth
+      Float::INFINITY
+    end
+
     def initialize(xml)
       @bez = xml.xpath(%Q(string(./metadaten/enbez)))
       @title = xml.xpath("string(./metadaten/titel)")
+    end
+
+    def inspect
+      [@bez, @title.gsub(/\s+/, " ").strip].join(" - ")
+    end
+
+    def ascii_tree
+      inspect
     end
   end
 
@@ -62,11 +74,15 @@ module Law
     end
 
     def inspect
-      [@uid, @short_name].compact.join(" - ")
+      "LAW: " + [@uid, @short_name].compact.join(" - ")
     end
 
+    def add_section(section)
+      append(section)
+    end
 
     def add_para(para)
+      append(para)
     end
 
     def initialize(xml)
@@ -79,7 +95,7 @@ module Law
 
       xml.xpath(%Q(dokumente/norm[/dokumente/@doknr!=@doknr])).each do |norm|
         if norm.at_xpath(%Q(./metadaten/gliederungseinheit))
-          self.append(Section.new(norm))
+          self.add_section(Section.new(norm))
         elsif norm.at_xpath("./metadaten/enbez")
           self.add_para(Para.new(norm))
         else
@@ -87,7 +103,5 @@ module Law
         end
       end
     end
-
-
   end
 end
