@@ -4,6 +4,9 @@ require 'gli'
 require 'law'
 require 'nokogiri'
 
+
+ENV["GLI_DEBUG"] = "true"
+
 module CLI
   extend GLI::App
   version Law::VERSION
@@ -18,13 +21,10 @@ module CLI
 
       Dir[File.join(directory, "**/*.xml")].each do |fname|
         xml = Nokogiri::XML(File.open(fname))
-        law = Law::Law.from_xml(xml)
+        law = Law::Law.new(xml)
 
-
-        p law
+        puts law.ascii_tree
       end
-
-
     end
   end
 end
