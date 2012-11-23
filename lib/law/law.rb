@@ -50,7 +50,7 @@ module Law
     end
 
     def inspect
-      [@bez, @title.gsub(/\s+/, " ").strip].join(" - ")
+      [@bez, @title.gsub(/\s+/, " ").strip].reject(&:blank?).join(" - ")
     end
 
     def ascii_tree
@@ -66,7 +66,7 @@ module Law
     attr_accessor :title
 
     def short_name=(val)
-      @short_name = val.empty? ? nil : val
+      @short_name = val.presence
     end
 
     def depth
@@ -74,7 +74,7 @@ module Law
     end
 
     def inspect
-      "LAW: " + [@uid, @short_name].compact.join(" - ")
+      "LAW: " + [@uid, @short_name || @title].compact.join(" - ")
     end
 
     def add_section(section)
@@ -91,7 +91,8 @@ module Law
       doc_meta = xml.at_xpath(%Q(dokumente/norm[/dokumente/@doknr=@doknr]/metadaten))
 
       self.uid = doc_meta.at_xpath(%Q(./jurabk)).text
-      self.short_name = doc_meta.xpath(%Q(string(./kurzue)))
+      self.short_name = doc_meta.xpath(%Q(string(./kurzue))).strip.presence
+      self.title = doc_meta.xpath(%Q(string(./langue))).strip.presence
 
       xml.xpath(%Q(dokumente/norm[/dokumente/@doknr!=@doknr])).each do |norm|
         if norm.at_xpath(%Q(./metadaten/gliederungseinheit))
