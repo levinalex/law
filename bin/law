@@ -23,7 +23,7 @@ module CLI
         xml = Nokogiri::XML(File.open(fname))
         law = Law::Law.new(xml)
 
-        puts law.ascii_tree
+        puts law.title
       end
     end
   end

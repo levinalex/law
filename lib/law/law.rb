@@ -14,14 +14,6 @@ module Law
         children.last.append(n)
       end
     end
-
-    def ascii_tree
-      subtree = children.map do |c|
-        c.ascii_tree.lines.map { |l| "   " + l.rstrip }.join("\n")
-      end
-
-      ["`- " + inspect + " (#{depth})", *subtree].join("\n")
-    end
   end
 
   class Section
@@ -39,11 +31,7 @@ module Law
     end
 
     def title
-      "sn: #{@sn}, bez: #{@bez}, title: #{@title}"
-    end
-
-    def inspect
-      "S: #{@bez} #{@sn}"
+      [@bez, @title].compact.join(" ")
     end
   end
 
@@ -55,6 +43,8 @@ module Law
     def initialize(xml)
       @bez = xml.xpath(%Q(string(./metadaten/enbez)))
       @title = xml.xpath("string(./metadaten/titel)")
+      @doknr = xml.xpath("string(@doknr)")
+      @xml = xml
     end
 
     def toc
@@ -62,15 +52,11 @@ module Law
     end
 
     def title
-      inspect
+      [@bez, @title].compact.join(" ")
     end
 
-    def inspect
-      [@bez, @title.gsub(/\s+/, " ").strip].reject(&:blank?).join(" - ")
-    end
-
-    def ascii_tree
-      inspect
+    def to_html
+      @xml.xpath("textdaten/text/Content").first.to_s.html_safe
     end
   end
 
@@ -89,10 +75,6 @@ module Law
       0
     end
 
-    def inspect
-      "LAW: " + [@uid, @short_name || @title].compact.join(" - ")
-    end
-
     def add_section(section)
       append(section)
     end
@@ -101,8 +83,13 @@ module Law
       append(para)
     end
 
+    def to_xml
+      @xml
+    end
+
     def initialize(xml)
       @children = []
+      @xml = xml
 
       doc_meta = xml.at_xpath(%Q(dokumente/norm[/dokumente/@doknr=@doknr]/metadaten))
 
