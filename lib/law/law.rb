@@ -3,6 +3,10 @@ module Law
     def children
       @children ||= []
     end
+    def toc
+      @children.inject({}) do |h,c| h[c] = c.toc; h end
+    end
+
     def append(n)
       if children.empty? || children.last.depth >= n.depth
         children << n
@@ -34,6 +38,10 @@ module Law
       @sections = []
     end
 
+    def title
+      "sn: #{@sn}, bez: #{@bez}, title: #{@title}"
+    end
+
     def inspect
       "S: #{@bez} #{@sn}"
     end
@@ -47,6 +55,14 @@ module Law
     def initialize(xml)
       @bez = xml.xpath(%Q(string(./metadaten/enbez)))
       @title = xml.xpath("string(./metadaten/titel)")
+    end
+
+    def toc
+      {}
+    end
+
+    def title
+      inspect
     end
 
     def inspect
